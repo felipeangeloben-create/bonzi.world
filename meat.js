@@ -22,18 +22,40 @@ function normalizeRid(rid) {
 function addBanEntry(guid, ip, end, reason) {
     const entry = { end: end, reason: reason };
     banStore['guid:' + guid] = entry;
-    banStore['ip:' + ip] = entry;
+    // Only store IP ban if the IP is a real user IP, not a proxy/shared address
+    if (ip && ip !== 'unknown') {
+        banStore['ip:' + ip] = { ...entry, guid: guid };
+    }
 }
 
 function getBanEntry(guid, ip) {
-    const entry = banStore['guid:' + guid] || banStore['ip:' + ip] || null;
-    if (!entry) return null;
-    if (new Date() > new Date(entry.end)) {
-        delete banStore['guid:' + guid];
-        delete banStore['ip:' + ip];
-        return null;
+    const guidKey = 'guid:' + guid;
+    const ipKey = 'ip:' + ip;
+
+    // Check guid ban
+    if (banStore[guidKey]) {
+        const entry = banStore[guidKey];
+        if (new Date() > new Date(entry.end)) {
+            delete banStore[guidKey];
+        } else {
+            return entry;
+        }
     }
-    return entry;
+
+    // Check ip ban — but only match if the IP was banned for a *different* guid
+    // (prevents shared/proxy IPs from mass-banning innocent users)
+    if (ip && ip !== 'unknown' && banStore[ipKey]) {
+        const entry = banStore[ipKey];
+        if (new Date() > new Date(entry.end)) {
+            delete banStore[ipKey];
+        } else if (entry.guid && entry.guid !== guid) {
+            // Only apply IP ban if the guid that caused it is different from this user
+            // This prevents a ban from carrying over to a completely new user on the same IP
+            return entry;
+        }
+    }
+
+    return null;
 }
 
 function isBanned(guid, ip) {
