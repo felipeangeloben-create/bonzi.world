@@ -334,7 +334,7 @@ input[type="text"] {
 
 @font-face {
   font-family: 'Tahoma';
-  src: url("../font/tahoma/tahoma.eot#iefix") format("embedded-opentype"), url("../font/tahoma/tahoma.woff") format("woff"), url("../font/tahoma/tahoma.ttf") format("truetype"), url("../font/tahoma/tahoma.svg#tahoma") format("svg");
+  src: url("../../font/tahoma/tahoma.eot#iefix") format("embedded-opentype"), url("../../font/tahoma/tahoma.woff") format("woff"), url("../../font/tahoma/tahoma.ttf") format("truetype"), url("../../font/tahoma/tahoma.svg#tahoma") format("svg");
   font-weight: normal;
   font-style: normal; }
 
