@@ -6,6 +6,11 @@ const io = require('./index.js').io;
 
 let bans;
 
+const getIP = (socket) => {
+    return socket.handshake.headers['cf-connecting-ip'] || 
+           socket.request.connection.remoteAddress;
+};
+
 exports.init = function() {
     fs.writeFile("./bans.json", "{}", { flag: 'wx' }, function(err) {
         if (!err) console.log("Created empty bans list.");
@@ -44,7 +49,9 @@ exports.addBan = function(ip, length, reason) {
 
 	for (var i = 0; i < socketList.length; i++) {
 		var socket = sockets[socketList[i]];
-		if (socket.request.connection.remoteAddress == ip)
+		var clientIP = socket.handshake.headers['cf-connecting-ip'] || socket.request.connection.remoteAddress;
+		
+		if (clientIP == ip)
 			exports.handleBan(socket);
 	}
 	exports.saveBans();
@@ -56,7 +63,8 @@ exports.removeBan = function(ip) {
 };
 
 exports.handleBan = function(socket) {
-	var ip = socket.request.connection.remoteAddress;
+	var ip = socket.handshake.headers['cf-connecting-ip'] || socket.request.connection.remoteAddress;
+	
 	if (bans[ip].end <= new Date().getTime()) {
 		exports.removeBan(ip);
 		return false;
@@ -79,7 +87,9 @@ exports.kick = function(ip, reason) {
 
 	for (var i = 0; i < socketList.length; i++) {
 		var socket = sockets[socketList[i]];
-		if (socket.request.connection.remoteAddress == ip) {
+		var clientIP = socket.handshake.headers['cf-connecting-ip'] || socket.request.connection.remoteAddress;
+		
+		if (clientIP == ip) {
 			socket.emit('kick', {
 				reason: reason || "N/A"
 			});
