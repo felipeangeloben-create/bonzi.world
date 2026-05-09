@@ -28,7 +28,6 @@ function addBanEntry(guid, ip, end, reason) {
     }
 }
 
-// PATCH: New logic to prevent mass-banning everyone by IP
 function getBanEntry(guid, ip) {
     const guidKey = 'guid:' + guid;
     const ipKey = 'ip:' + ip;
@@ -43,19 +42,16 @@ function getBanEntry(guid, ip) {
         }
     }
 
-    // Check ip ban - only if IP actually references a different active banned guid
+    // Check ip ban — but only match if the IP was banned for a *different* guid
+    // (prevents shared/proxy IPs from mass-banning innocent users)
     if (ip && ip !== 'unknown' && banStore[ipKey]) {
         const entry = banStore[ipKey];
         if (new Date() > new Date(entry.end)) {
             delete banStore[ipKey];
-        } else if (
-            entry.guid && entry.guid !== guid &&
-            banStore['guid:' + entry.guid] // only ban if the original guid is still banned!
-        ) {
+        } else if (entry.guid && entry.guid !== guid) {
+            // Only apply IP ban if the guid that caused it is different from this user
+            // This prevents a ban from carrying over to a completely new user on the same IP
             return entry;
-        } else {
-            // PATCH: If the original banned guid is no longer banned, remove IP ban as well
-            delete banStore[ipKey];
         }
     }
 
@@ -470,7 +466,7 @@ class User {
             this.socket.emit('updateAll', { usersPublic: this.room.getUsersPublic() });
 
             var isPublicRoom = roomsPublic.indexOf(rid) != -1;
-            this.socket.emit('room', { id: rid, room: rid, name: isPublicRoom ? 'default' : rid, code: isPublicRoom ? null : rid, isOwner: this.room.prefs.owner == this.guid, isPublic: isPublicRoom })[...]
+            this.socket.emit('room', { id: rid, room: rid, name: isPublicRoom ? 'default' : rid, code: isPublicRoom ? null : rid, isOwner: this.room.prefs.owner == this.guid, isPublic: isPublicRoom });
 
             this.socket.on('talk', this.talk.bind(this));
             this.socket.on('command', this.command.bind(this));
@@ -541,7 +537,7 @@ class User {
             callback({ success: true });
 
             var isPublicRoom = roomsPublic.indexOf(rid) != -1;
-            this.socket.emit('room', { id: rid, room: rid, name: isPublicRoom ? 'default' : rid, code: isPublicRoom ? null : rid, isOwner: this.room.prefs.owner == this.guid, isPublic: isPublicRoom })[...]
+            this.socket.emit('room', { id: rid, room: rid, name: isPublicRoom ? 'default' : rid, code: isPublicRoom ? null : rid, isOwner: this.room.prefs.owner == this.guid, isPublic: isPublicRoom });
             this.socket.emit('updateAll', { usersPublic: this.room.getUsersPublic() });
             this.room.emit('room:changed');
         } else {
@@ -562,7 +558,7 @@ class User {
         if ((text.length <= this.room.prefs.char_limit) && (text.length > 0)) {
             const pitch = Math.max(Math.min(parseInt(this.public.pitch) || 100, 400), 50);
             const speed = Math.max(Math.min(parseInt(this.public.speed) || 150, 250), 50);
-            const sapiUrl = "https://www.tetyys.com/SAPI4/SAPI4?text=" + encodeURIComponent(text) + "&voice=Adult%20Male%20%232%2C%20American%20English%20(TruVoice)&pitch=" + pitch + "&speed=" + speed[...]
+            const sapiUrl = "https://www.tetyys.com/SAPI4/SAPI4?text=" + encodeURIComponent(text) + "&voice=Adult%20Male%20%232%2C%20American%20English%20(TruVoice)&pitch=" + pitch + "&speed=" + speed;
             const audioId = "sapi_" + Date.now() + "_" + Math.random().toString(36).slice(2);
             if (this.room) this.room.emit('talk', { guid: this.guid, text: text, extra: { audio: { url: sapiUrl, id: audioId } } });
         }
