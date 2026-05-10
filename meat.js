@@ -122,7 +122,7 @@ function checkRoomEmpty(room) {
 }
 
 const DEFAULT_ROOM_VIDS = {
-    'news':    '9Auq9mYxFEE',
+    'news':    'boMTNOjfQ6E',
     'why':     '3RpxJT5w7Tc',
     'area_51': 'TRc85qoNo6w',
     'poland':  'rRPQs_kM_nw'
