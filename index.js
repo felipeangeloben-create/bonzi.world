@@ -1,15 +1,8 @@
-// ========================================================================
-// Server init
-// ========================================================================
-
-// Filesystem reading functions
 const fs = require('fs-extra');
 
-// Load settings
 try {
 	stats = fs.lstatSync('settings.json');
 } catch (e) {
-	// If settings do not yet exist
 	if (e.code == "ENOENT") {
 		try {
 			fs.copySync(
@@ -21,17 +14,13 @@ try {
 			console.log(e);
 			throw "Could not create new settings file.";
 		}
-	// Else, there was a misc error (permissions?)
 	} else {
 		console.log(e);
 		throw "Could not read 'settings.json'.";
 	}
 }
 
-// Load settings into memory
 const settings = require("./settings.json");
-// Setup basic express server
-
 var express = require('express');
 var app = express();
 var https = require('https');
@@ -39,7 +28,7 @@ const VPNAPI_KEY = 'cd10f82529fc4b5b87a8c4f51ca0d186';
 
 const checkVPN = async (req, res, next) => {
     let userIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
+    
     if (userIP.includes(',')) {
         userIP = userIP.split(',')[0].trim();
     }
@@ -87,31 +76,23 @@ const checkVPN = async (req, res, next) => {
     }
 };
 
-
 app.use(checkVPN);
 if (settings.express.serveStatic)
     app.use(express.static('./build/www'));
 var server = require('http').createServer(app);
-
-// Init socket.io
 var io = require('socket.io')(server);
 var port = process.env.PORT || settings.port;
 
 exports.io = io;
 
-// Init sanitize-html
 var sanitize = require('sanitize-html');
 
-// Init winston loggers (hi there)
 const Log = require('./log.js');
 Log.init();
 const log = Log.log;
 
-// Load ban list
 const Ban = require('./ban.js');
 Ban.init();
-
-// Start actually listening
 server.listen(port, function () {
 	console.log(
 		"\n",
@@ -121,41 +102,6 @@ server.listen(port, function () {
 	);
 });
 app.use(express.static(__dirname + '/public'));
-
-// Handle Bonzi.WORLD API requests
- /*app.get('/api/v1/', (req, res) => res.sendStatus('hello world'))
-app.get('/api/v1/rooms/',  function(req, res){
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(require('./rooms.json')));
-})
-app.get('/api/v1/identity/user/', function(req, res){
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(require('./user.json')));
-})
-app.get('/api/v1/identity/fingerprint/', function(req, res){
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(require('./fingerprint.json')));
-})
-app.get('/api/v1/session/', function(req, res){
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(require('./session.json')));
-})
-app.get('/api/v1/login/', function(req, res){
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(require('./logins.json')));
-})
-app.get('/api/v1/login/register/', function(req, res){
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(require('./register.json')));
-}) 
-app.get('/api/v1/login/forgot/', function(req, res){
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(require('./forgot.json')));
-})
-app.get('/api/v1/unload/', function(req, res){
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(require('./unload.json')));
-}) */
 app.use(express.json());
 
 app.get('/api/v1/', async (req, res) => res.sendStatus('hello world'))
@@ -225,7 +171,6 @@ app.post('/api/v1/unload/', async (req, res) => {
 })
 
 
-// Patch logins
 app.post( "/api/v2/login/", async ( req, res ) => {
     try {
         const user = await User.findByCredentials(
@@ -246,25 +191,10 @@ app.post( "/api/v2/login/", async ( req, res ) => {
     }
 } );
 
-
-
-// ========================================================================
-// Banning functions
-// ========================================================================
-
-// ========================================================================
-// Helper functions
-// ========================================================================
-
 const Utils = require("./utils.js")
-
-// ========================================================================
-// The Beef(TM)
-// ========================================================================
 
 const Meat = require("./meat.js");
 Meat.beat();
 
-// Console commands
 const Console = require('./console.js');
 Console.listen();
