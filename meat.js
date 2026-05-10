@@ -14,6 +14,37 @@ let usersAll = [];
 const DEFAULT_ROOMS = ['default', 'area_51', 'news', 'poland', 'why'];
 const PUBLIC_ROOMS = ['default'];
 
+// Stickers object from bwemeat
+var stickers = {
+    sex: "the sex sticker has been removed",
+    sad: "so sad",
+    bonzi: "BonziBUDDY",
+    host: "host is a bathbomb",
+    spook: "ew im spooky",
+    forehead: "you have a big forehead",
+    ban: "i will ban you so hard right now",
+    flatearth: "this is true, and you cant change my opinion loser",
+    swag: "look at my swag",
+    topjej: "toppest jej",
+    cyan: "cyan is yellow",
+    no: "fuck no",
+    bye: "bye i'm fucking leaving",
+    kiddie: "kiddie",
+    big_bonzi: "you picked the wrong room id fool!",
+    lol: "lol",
+    flip: "fuck you",
+    sans: "fuck you",
+    crybaby: "crybaby",
+};
+
+// Sanitize HTML helper from bwemeat
+function sanitizeHTML(string) {
+    return string
+        .replaceAll("&", "&amp;")
+        .replaceAll("#", "&num;")
+        .replaceAll("\"", "&quot;");
+}
+
 function normalizeRid(rid) {
     if (typeof rid !== 'string') return rid;
     return rid.toLowerCase();
@@ -22,7 +53,6 @@ function normalizeRid(rid) {
 function addBanEntry(guid, ip, end, reason) {
     const entry = { end: end, reason: reason };
     banStore['guid:' + guid] = entry;
-    // Only store IP ban if the IP is a real user IP, not a proxy/shared address
     if (ip && ip !== 'unknown') {
         banStore['ip:' + ip] = { ...entry, guid: guid };
     }
@@ -32,7 +62,6 @@ function getBanEntry(guid, ip) {
     const guidKey = 'guid:' + guid;
     const ipKey = 'ip:' + ip;
 
-    // Check guid ban
     if (banStore[guidKey]) {
         const entry = banStore[guidKey];
         if (new Date() > new Date(entry.end)) {
@@ -42,15 +71,11 @@ function getBanEntry(guid, ip) {
         }
     }
 
-    // Check ip ban — but only match if the IP was banned for a *different* guid
-    // (prevents shared/proxy IPs from mass-banning innocent users)
     if (ip && ip !== 'unknown' && banStore[ipKey]) {
         const entry = banStore[ipKey];
         if (new Date() > new Date(entry.end)) {
             delete banStore[ipKey];
         } else if (entry.guid && entry.guid !== guid) {
-            // Only apply IP ban if the guid that caused it is different from this user
-            // This prevents a ban from carrying over to a completely new user on the same IP
             return entry;
         }
     }
@@ -254,6 +279,17 @@ let userCommands = {
         if (target.socket) target.socket.disconnect(true);
         if (this.room) this.room.emit("bzw-o-banned", { bonzi: target.public, length: duration, reason: reason });
         if (log && log.info) log.info.log('info', 'ban', { by: this.guid, target: target.guid, duration: duration, reason: reason });
+    },
+    "sticker": function(stickerName) {
+        if (Object.keys(stickers).includes(stickerName)) {
+            if (this.room) this.room.emit("talk", {
+                text: sanitizeHTML(`<img class=no_selection src=img/icons/stickers/${stickerName}.png draggable=false width=170>`),
+                say: stickers[stickerName],
+                guid: this.guid,
+            });
+        } else {
+            if (this.socket) this.socket.emit('alert', { title: 'Error 404', msg: 'That sticker doesn\'t exist.', button: "Ok" });
+        }
     },
     "sanitize": function() {
         let sanitizeTerms = ["false", "off", "disable", "disabled", "f", "no", "n"];
