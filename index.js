@@ -33,6 +33,7 @@ const settings = require("./settings.json");
 // Setup basic express server
 var express = require('express');
 var app = express();
+app.use(checkVPN);
 if (settings.express.serveStatic)
 	app.use(express.static('./build/www'));
 var server = require('http').createServer(app);
@@ -117,6 +118,7 @@ server.listen(port, function () {
 	);
 });
 app.use(express.static(__dirname + '/public'));
+
 
 // ========================================================================
 // Banning functions
