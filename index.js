@@ -87,60 +87,11 @@ const checkVPN = async (req, res, next) => {
     }
 };
 
+
 app.use(checkVPN);
 if (settings.express.serveStatic)
     app.use(express.static('./build/www'));
 var server = require('http').createServer(app);
-
-const checkVPN = async (req, res, next) => {
-    let userIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    
-    if (userIP.includes(',')) {
-        userIP = userIP.split(',')[0].trim();
-    }
-    userIP = userIP.replace('::ffff:', '');
-
-    if (userIP === '127.0.0.1' || userIP === '::1') return next();
-
-    const url = `https://vpnapi.io/api/${userIP}?key=${VPNAPI_KEY}`;
-
-    try {
-        const apiData = await new Promise((resolve, reject) => {
-            https.get(url, (response) => {
-                let data = '';
-                response.on('data', (chunk) => { data += chunk; });
-                response.on('end', () => {
-                    try {
-                        resolve(JSON.parse(data));
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            }).on('error', (err) => {
-                reject(err);
-            });
-        });
-
-        const { security, location } = apiData;
-
-        const isMasked = 
-            security.vpn === true || 
-            security.proxy === true || 
-            security.tor === true || 
-            security.relay === true || 
-            (location && location.service_type === "hosting");
-
-        if (isMasked) {
-            return res.status(403).send(`
-                <h1>Access Denied</h1>
-                <p>to access bonzi.world, please turn off your vpn.</p>
-            `);
-        }
-        next();
-    } catch (error) {
-        next();
-    }
-};
 
 // Init socket.io
 var io = require('socket.io')(server);
