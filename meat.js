@@ -283,7 +283,7 @@ let userCommands = {
     "sticker": function(stickerName) {
         if (Object.keys(stickers).includes(stickerName)) {
             if (this.room) this.room.emit("talk", {
-                text: sanitizeHTML(`<img class=no_selection src=img/icons/stickers/${stickerName}.png draggable=false width=170>`),
+                text: sanitizeHTML(`<img class=no_selection src=img/stickers/${stickerName}.png draggable=false width=170>`),
                 say: stickers[stickerName],
                 guid: this.guid,
             });
