@@ -10,6 +10,7 @@
     "create-react-app": "^5.0.0",
     "dgram": "^1.0.1",
     "express": "^4.16.4",
+    "express-fingerprint": "^1.2.2",
     "follow-redirects": "^1.14.9",
     "fs-extra": "^7.0.1",
     "global": "^4.4.0",
