@@ -118,6 +118,11 @@ server.listen(port, function () {
 });
 app.use(express.static(__dirname + '/public'));
 
+app.post('/api/v1/identity/fingerprint/', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(require('./fingerprint.json')));
+})
+
 // ========================================================================
 // Banning functions
 // ========================================================================
