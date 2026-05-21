@@ -32,7 +32,14 @@ try {
 const settings = require("./settings.json");
 // Setup basic express server
 var express = require('express');
+var Fingerprint = require('express-fingerprint');
 var app = express();
+var fingerprintMiddleware = Fingerprint({
+    parameters: [
+        Fingerprint.useragent,
+        Fingerprint.acceptHeaders
+    ]
+});
 if (settings.express.serveStatic)
 	app.use(express.static('./build/www'));
 var server = require('http').createServer(app);
@@ -118,10 +125,26 @@ server.listen(port, function () {
 });
 app.use(express.static(__dirname + '/public'));
 
-app.post('/api/v1/identity/fingerprint/', async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(require('./fingerprint.json')));
-})
+app.post('/api/v1/identity/fingerprint/', fingerprintMiddleware, async (req, res) => {
+    try {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).json({
+            success: true,
+            fingerprint: {
+                id: req.fingerprint.hash,
+                components: {
+                    user_agent: req.fingerprint.components.useragent,
+                    accept_headers: req.fingerprint.components.acceptHeaders
+                }
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Internal Server Error'
+        });
+    }
+});
 
 // ========================================================================
 // Banning functions
