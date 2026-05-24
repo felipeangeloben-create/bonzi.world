@@ -299,6 +299,9 @@ let userCommands = {
     "joke": function() {
         if (this.room) this.room.emit("joke", { guid: this.guid, rng: Math.random() });
     },
+    "dvdbounce": function() {
+        if (this.room) socket.emit("dvdbounce", { guid: this.guid, rng: Math.random() });
+    },
     "fact": function() {
         if (this.room) this.room.emit("fact", { guid: this.guid, rng: Math.random() });
     },
