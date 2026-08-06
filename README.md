@@ -1,9 +1,3 @@
-# bonzi.world
-
-A bonzi.world revival project that recreates bonzi.world on it's glory, so yeah. 
-
-bonzi.world was originally created by Foodz/BagelChip.
-
 ## Dependencies
 - Node.js and npm
 - Ruby
