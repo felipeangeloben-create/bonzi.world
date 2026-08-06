@@ -1,6 +1,6 @@
 # bonzi.world
 
-A bonzi.world revival project that recreates bonzi.world on it's glory, it's 1.1 recreated so yeah. 
+A bonzi.world revival project that recreates bonzi.world on it's glory, so yeah. 
 
 bonzi.world was originally created by Foodz/BagelChip.
 
