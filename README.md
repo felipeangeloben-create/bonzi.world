@@ -1,8 +1,4 @@
-<p align="center" width="100%">
-  <img width="52%" height="40%" src="https://files.catbox.moe/nmkmfr.png?raw=true" />
-</p>
-
-# bonzi.world: Throwback
+# bonzi.world
 
 A bonzi.world revival project that recreates bonzi.world on it's glory, it's 1.1 recreated so yeah. 
 
