@@ -16,7 +16,7 @@ cd bonzi.world
 
 ### Client
 ```
-cd src
+cd build/www
 npm install
 grunt src_www
 cd ..
