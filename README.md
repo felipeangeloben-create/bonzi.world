@@ -18,7 +18,7 @@ cd bonzi.world
 ```
 cd src
 npm install
-grunt build_www
+grunt src_www
 cd ..
 ```
 
